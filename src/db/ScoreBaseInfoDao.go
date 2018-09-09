@@ -46,3 +46,52 @@ func IsScoreBaseInfoExist(href string) bool {
 	}
 	return count > 0
 }
+
+func UpdateScoreBaseInfoId(href string, id int) bool {
+	db, err := sql.Open("mysql", dataSourceName)
+	if err != nil {
+		log.Println("打开数据库失败 : %v", err)
+		return false
+	}
+	defer db.Close()
+	res, err := db.Exec("update score_base_info_tbl set score_id = ? where score_href = ?", id, href)
+	if err != nil {
+		log.Println("数据库更新失败 : %v", err)
+		return false
+	}
+	rows, errs := res.RowsAffected()
+	if rows < 1 {
+		log.Println("更新数据库条数小于1原因是 :%v", errs)
+		return false
+	}
+	return true
+}
+
+func GetScoreBaseInfo() ([]string, error) {
+	scoreBaseInfos := make([]string, 0)
+	db, err := sql.Open("mysql", dataSourceName)
+	if err != nil {
+		log.Println("打开数据库失败 : %v", err)
+		return nil, err
+	}
+	defer db.Close()
+	rows, err := db.Query("select score_href from score_base_info_tbl where score_id = ?", 0)
+	if err != nil {
+		log.Println("数据查询库失败 : %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	i := 0
+	for rows.Next() {
+		i++
+		log.Println("处理数据库数据", i)
+		var score_href string
+		err = rows.Scan(&score_href)
+		if err != nil {
+			log.Println("数据查询对象映射失败 : %v", err)
+		} else {
+			scoreBaseInfos = append(scoreBaseInfos, score_href)
+		}
+	}
+	return scoreBaseInfos, nil
+}

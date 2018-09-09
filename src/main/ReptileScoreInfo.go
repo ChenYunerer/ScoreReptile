@@ -4,7 +4,6 @@ import (
 	"ScoreReptile/src/db"
 	"ScoreReptile/src/model"
 	"ScoreReptile/src/net"
-	"errors"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"strconv"
@@ -17,7 +16,7 @@ import (
 
 var scoreBaseInfoChain = make(chan model.ScoreBaseInfo, 2000)
 
-func main() {
+func main2() {
 	scoreListTempCount := db.CountScoreListTemp()
 	log.Println(scoreListTempCount)
 
@@ -53,22 +52,20 @@ func baseInfoReptile() {
 	}
 	for _, s := range scoreListTemps {
 		href := s.ScoreHref
-		exist := db.IsScoreBaseInfoExist(s.ScoreHref)
+		//查询该数据是否已经处理过
+		exist := db.IsScoreBaseInfoExist(href)
 		if exist {
 			log.Println("数据已处理 跳过...")
 			continue
 		}
+		//获取HTML
 		reader, err := net.GetRequestForReader(BaseUrl + href)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		var scoreBaseInfo model.ScoreBaseInfo
-		id, err := getScoreIdFromHref(href)
-		if err != nil {
-			log.Println("id解析失败", err)
-		}
-		scoreBaseInfo.ScoreId = id
+		//封住已知原始数据
 		scoreBaseInfo.ScoreName = s.ScoreName
 		scoreBaseInfo.ScoreHref = s.ScoreHref
 		scoreBaseInfo.ScoreAuthor = s.ScoreAuthor
@@ -76,9 +73,11 @@ func baseInfoReptile() {
 		scoreBaseInfo.ScoreSinger = s.ScoreSinger
 		scoreBaseInfo.ScoreUploader = s.ScoreUploader
 		scoreBaseInfo.ScoreUploadTime = s.ScoreUploadTime
+		//解析HTML
 		document, _ := goquery.NewDocumentFromReader(reader)
 		selection := document.Find(".content .content_head")
-		//fullName := selection.Find("h1").Text()
+		fullName := selection.Find("h1").Text()
+		scoreBaseInfo.ScoreName = fullName
 		keys := make([]string, 0)
 		selection.Find(".info span").Each(func(i int, selection *goquery.Selection) {
 			if selection.Text() != "" {
@@ -109,26 +108,42 @@ func baseInfoReptile() {
 				scoreBaseInfo.ScoreUploadTime = value
 			}
 		}
+		//获取曲谱Id
+		//从href获取id
+		id := GetScoreIdFromHref(href)
+		if id == 0 {
+			log.Println("无法从href中获取id，尝试从onlick事件中获取")
+		}
+		//从onclick中获取曲谱Id
+		onclick, exist := document.Find("#look_all").Attr("onclick")
+		if !exist {
+			log.Println("无法获取曲谱id")
+		} else {
+			id, _ = strconv.Atoi(strings.Split(strings.Split(onclick, "','")[0], "'")[1])
+		}
+		scoreBaseInfo.ScoreId = id
 		//获取曲谱封面图
 		scoreBaseInfo.ScoreViewCount = getScoreViewCount(id)
 		scoreCoverPicture, _ := document.Find(".imageList a").Attr("href")
 		scoreBaseInfo.ScoreCoverPicture = scoreCoverPicture
+
 		scoreBaseInfoChain <- scoreBaseInfo
 	}
 }
 
 //从href中解析id
-func getScoreIdFromHref(href string) (int, error) {
-	strs := strings.Split(href, "/p")
+func GetScoreIdFromHref(href string) int {
+	strs := strings.Split(href, "/")
+	strs = strings.Split(strs[len(strs)-1], "p")
 	if len(strs) != 2 {
-		return 0, errors.New("解析Id失败")
+		return 0
 	}
 	strs = strings.Split(strs[1], ".")
 	if len(strs) != 2 {
-		return 0, errors.New("解析Id失败")
+		return 0
 	}
 	id, _ := strconv.Atoi(strs[0])
-	return id, nil
+	return id
 }
 
 //获取曲谱浏览量

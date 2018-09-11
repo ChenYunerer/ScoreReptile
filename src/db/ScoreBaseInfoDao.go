@@ -67,15 +67,15 @@ func UpdateScoreBaseInfoId(href string, id int) bool {
 	return true
 }
 
-func GetScoreBaseInfo() ([]string, error) {
-	scoreBaseInfos := make([]string, 0)
+func GetScoreBaseInfo(count int) ([]string, error) {
+	scoreBaseInfos := make([]model.ScoreBaseInfo, 0)
 	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query("select score_href from score_base_info_tbl where score_id = ?", 0)
+	rows, err := db.Query("select score_id, score_name, score_href from score_base_info_tbl limit ?", count)
 	if err != nil {
 		log.Println("数据查询库失败 : %v", err)
 		return nil, err
@@ -85,11 +85,13 @@ func GetScoreBaseInfo() ([]string, error) {
 	for rows.Next() {
 		i++
 		log.Println("处理数据库数据", i)
-		var score_href string
-		err = rows.Scan(&score_href)
+		var score_id int
+		var score_name, score_href string
+		err = rows.Scan(&score_id, &score_name, &score_href)
 		if err != nil {
 			log.Println("数据查询对象映射失败 : %v", err)
 		} else {
+			scoreBaseInfo := model.ScoreBaseInfo{}
 			scoreBaseInfos = append(scoreBaseInfos, score_href)
 		}
 	}

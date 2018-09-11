@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func main() {
+func main3() {
 	hrefs, err := db.GetScoreBaseInfo()
 	if err != nil {
 		log.Println(err)

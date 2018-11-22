@@ -25,17 +25,17 @@ func startProcessListTemp() {
 	//qiyue（器乐）xiqu（戏曲）puyou(谱友园地) 使用tempScoreReptileListType2
 	//minge（民歌）meisheng（美声）tongsu（通俗）waiguo（外国）shaoer（少儿）hechang（合唱） 使用tempScoreReptileListType3
 
-	go func() {
+	/*go func() {
 		//jipu（制谱园地）42790
 		tempScoreReptileListType1(BaseUrl+"jipu", "制谱园地")
-	}()
+	}()*/
 
-	/*go func() {
+	go func() {
 		//yuanchuang(原创专栏) 16272
 		tempScoreReptileListType1(BaseUrl+"yuanchuang", "原创专栏")
 	}()
 
-	go func() {
+	/*go func() {
 		//qiyue（器乐）49694
 		tempScoreReptileListType2(BaseUrl + "qiyue")
 	}()

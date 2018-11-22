@@ -28,57 +28,57 @@ func startProcessListTemp() {
 	/*go func() {
 		//jipu（制谱园地）42790
 		tempScoreReptileListType1(BaseUrl+"jipu", "制谱园地")
-	}()*/
+	}()
 
 	go func() {
-		//yuanchuang(原创专栏) 16272
+		//yuanchuang(原创专栏) 16272 ok
 		tempScoreReptileListType1(BaseUrl+"yuanchuang", "原创专栏")
 	}()
 
-	/*go func() {
-		//qiyue（器乐）49694
+	go func() {
+		//qiyue（器乐）49694 ok
 		tempScoreReptileListType2(BaseUrl + "qiyue")
 	}()
 
 	go func() {
 		//xiqu（戏曲）9493
 		tempScoreReptileListType2(BaseUrl + "xiqu")
-	}()
+	}()*/
 
 	go func() {
 		//puyou（谱友园地）12189
 		tempScoreReptileListType2(BaseUrl + "puyou")
 	}()
 
-	go func() {
+	/*go func() {
 		//minge（民歌）66517
 		tempScoreReptileListType3(BaseUrl + "minge", "民歌")
-	}()
+	}()*/
 
 	go func() {
 		//meisheng（美声）3777
-		tempScoreReptileListType3(BaseUrl + "meisheng", "美声")
+		tempScoreReptileListType3(BaseUrl+"meisheng", "美声")
 	}()
 
 	go func() {
 		//tongsu（通俗）17484
-		tempScoreReptileListType3(BaseUrl + "tongsu", "通俗")
+		tempScoreReptileListType3(BaseUrl+"tongsu", "通俗")
 	}()
 
 	go func() {
 		//waiguo（外国）6728
-		tempScoreReptileListType3(BaseUrl + "waiguo", "外国")
+		tempScoreReptileListType3(BaseUrl+"waiguo", "外国")
 	}()
 
 	go func() {
 		//shaoer（少儿）14185
-		tempScoreReptileListType3(BaseUrl + "shaoer", "少儿")
+		tempScoreReptileListType3(BaseUrl+"shaoer", "少儿")
 	}()
 
 	go func() {
 		//hechang（合唱）6906
-		tempScoreReptileListType3(BaseUrl + "hechang", "合唱")
-	}()*/
+		tempScoreReptileListType3(BaseUrl+"hechang", "合唱")
+	}()
 
 	i := 0
 	for {

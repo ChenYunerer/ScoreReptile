@@ -17,7 +17,7 @@ const BaseUrl = "http://www.qupu123.com/"
 
 var scoreListTempChain = make(chan model.ScoreListTemp, 2000)
 
-func main1() {
+func startProcessListTemp() {
 	//jipu（制谱园地） yuanchuang(原创专栏) qiyue（器乐）xiqu（戏曲）puyou（谱友园地）
 	//声乐 minge（民歌）meisheng（美声）tongsu（通俗）waiguo（外国）shaoer（少儿）hechang（合唱）
 	//由于html排版不同需要区别处理每个大类的数据
@@ -26,57 +26,57 @@ func main1() {
 	//minge（民歌）meisheng（美声）tongsu（通俗）waiguo（外国）shaoer（少儿）hechang（合唱） 使用tempScoreReptileListType3
 
 	go func() {
-		//jipu（制谱园地）
+		//jipu（制谱园地）42790
 		tempScoreReptileListType1(BaseUrl+"jipu", "制谱园地")
 	}()
 
-	go func() {
-		//yuanchuang(原创专栏)
+	/*go func() {
+		//yuanchuang(原创专栏) 16272
 		tempScoreReptileListType1(BaseUrl+"yuanchuang", "原创专栏")
 	}()
 
-	/*go func() {
-		//qiyue（器乐）
+	go func() {
+		//qiyue（器乐）49694
 		tempScoreReptileListType2(BaseUrl + "qiyue")
 	}()
 
 	go func() {
-		//xiqu（戏曲）
+		//xiqu（戏曲）9493
 		tempScoreReptileListType2(BaseUrl + "xiqu")
 	}()
 
 	go func() {
-		//puyou（谱友园地）
+		//puyou（谱友园地）12189
 		tempScoreReptileListType2(BaseUrl + "puyou")
 	}()
 
 	go func() {
-		//minge（民歌）
+		//minge（民歌）66517
 		tempScoreReptileListType3(BaseUrl + "minge", "民歌")
 	}()
 
 	go func() {
-		//meisheng（美声）
+		//meisheng（美声）3777
 		tempScoreReptileListType3(BaseUrl + "meisheng", "美声")
 	}()
 
 	go func() {
-		//tongsu（通俗）
+		//tongsu（通俗）17484
 		tempScoreReptileListType3(BaseUrl + "tongsu", "通俗")
 	}()
 
 	go func() {
-		//waiguo（外国）
+		//waiguo（外国）6728
 		tempScoreReptileListType3(BaseUrl + "waiguo", "外国")
 	}()
 
 	go func() {
-		//shaoer（少儿）
+		//shaoer（少儿）14185
 		tempScoreReptileListType3(BaseUrl + "shaoer", "少儿")
 	}()
 
 	go func() {
-		//hechang（合唱）
+		//hechang（合唱）6906
 		tempScoreReptileListType3(BaseUrl + "hechang", "合唱")
 	}()*/
 

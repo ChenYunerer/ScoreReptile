@@ -16,7 +16,7 @@ import (
 
 var scoreBaseInfoChain = make(chan model.ScoreBaseInfo, 2000)
 
-func main2() {
+func startProcessBaseInfo() {
 	scoreListTempCount := db.CountScoreListTemp()
 	log.Println(scoreListTempCount)
 

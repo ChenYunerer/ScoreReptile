@@ -67,7 +67,7 @@ func UpdateScoreBaseInfoId(href string, id int) bool {
 	return true
 }
 
-func GetScoreBaseInfo(count int) ([]string, error) {
+func GetScoreBaseInfo(count int) ([]model.ScoreBaseInfo, error) {
 	scoreBaseInfos := make([]model.ScoreBaseInfo, 0)
 	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {
@@ -75,7 +75,7 @@ func GetScoreBaseInfo(count int) ([]string, error) {
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query("select score_id, score_name, score_href from score_base_info_tbl limit ?", count)
+	rows, err := db.Query("select score_id, score_name, score_href from score_base_info_tbl where score_picture_count = 0 limit ?", count)
 	if err != nil {
 		log.Println("数据查询库失败 : %v", err)
 		return nil, err
@@ -91,9 +91,33 @@ func GetScoreBaseInfo(count int) ([]string, error) {
 		if err != nil {
 			log.Println("数据查询对象映射失败 : %v", err)
 		} else {
-			scoreBaseInfo := model.ScoreBaseInfo{}
-			scoreBaseInfos = append(scoreBaseInfos, score_href)
+			scoreBaseInfo := model.ScoreBaseInfo{
+				ScoreId:   score_id,
+				ScoreName: score_name,
+				ScoreHref: score_href,
+			}
+			scoreBaseInfos = append(scoreBaseInfos, scoreBaseInfo)
 		}
 	}
 	return scoreBaseInfos, nil
+}
+
+func UpdateScoreBaseInfoPictureCount(href string, count int64) bool {
+	db, err := sql.Open("mysql", dataSourceName)
+	if err != nil {
+		log.Println("打开数据库失败 : %v", err)
+		return false
+	}
+	defer db.Close()
+	res, err := db.Exec("update score_base_info_tbl set score_picture_count = ? where score_href = ?", count, href)
+	if err != nil {
+		log.Println("数据库更新失败 : %v", err)
+		return false
+	}
+	rows, errs := res.RowsAffected()
+	if rows < 1 {
+		log.Println("更新数据库条数小于1原因是 :%v", errs)
+		return false
+	}
+	return true
 }

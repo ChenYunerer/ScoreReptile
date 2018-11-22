@@ -97,7 +97,7 @@ func startProcessListTemp() {
 				log.Println("数据已存在")
 			}
 		default:
-			log.Println("no data waiting")
+			log.Println("no data waiting", i)
 		}
 	}
 }

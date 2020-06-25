@@ -75,7 +75,7 @@ func GetScoreListTemps() ([]model.ScoreListTemp, error) {
 		return nil, err
 	}
 	defer db.Close()
-	rows, err := db.Query("select score_category, score_name, score_href, score_uploader, score_author, score_singer, score_uploader_time, score_reptile_status from score_list_temp_tbl")
+	rows, err := db.Query("select score_category, score_name, score_href, score_uploader, score_author, score_singer, score_uploader_time, score_reptile_status from score_list_temp_tbl where score_reptile_status = 0")
 	if err != nil {
 		log.Println("数据查询库失败 : %v", err)
 		return nil, err
@@ -114,7 +114,7 @@ func CountScoreListTemp() int {
 		return 0
 	}
 	defer db.Close()
-	rows := db.QueryRow("select count(*) from score_list_temp_tbl")
+	rows := db.QueryRow("select count(*) from score_list_temp_tbl where score_reptile_status = 0")
 	var count int
 	err = rows.Scan(&count)
 	if err != nil {

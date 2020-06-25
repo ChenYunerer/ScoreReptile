@@ -102,6 +102,41 @@ func GetScoreBaseInfo(count int) ([]model.ScoreBaseInfo, error) {
 	return scoreBaseInfos, nil
 }
 
+func GetUnCountPicScoreBaseInfo() ([]model.ScoreBaseInfo, error) {
+	scoreBaseInfos := make([]model.ScoreBaseInfo, 0)
+	db, err := sql.Open("mysql", dataSourceName)
+	if err != nil {
+		log.Println("打开数据库失败 : %v", err)
+		return nil, err
+	}
+	defer db.Close()
+	rows, err := db.Query("select score_id, score_name, score_href from score_base_info_tbl where score_picture_count = 0")
+	if err != nil {
+		log.Println("数据查询库失败 : %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	i := 0
+	for rows.Next() {
+		i++
+		log.Println("处理数据库数据", i)
+		var score_id int
+		var score_name, score_href string
+		err = rows.Scan(&score_id, &score_name, &score_href)
+		if err != nil {
+			log.Println("数据查询对象映射失败 : %v", err)
+		} else {
+			scoreBaseInfo := model.ScoreBaseInfo{
+				ScoreId:   score_id,
+				ScoreName: score_name,
+				ScoreHref: score_href,
+			}
+			scoreBaseInfos = append(scoreBaseInfos, scoreBaseInfo)
+		}
+	}
+	return scoreBaseInfos, nil
+}
+
 func UpdateScoreBaseInfoPictureCount(href string, count int64) bool {
 	db, err := sql.Open("mysql", dataSourceName)
 	if err != nil {

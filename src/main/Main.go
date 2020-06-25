@@ -1,7 +1,9 @@
 package main
 
 func main() {
-	startProcessListTemp()
+	//startProcessListTemp()
 	//startProcessBaseInfo()
 	//startProcessPictureInfo()
+	//startDownloadScorePicture()
+	Upload2Elastic()
 }

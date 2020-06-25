@@ -43,17 +43,17 @@ func startProcessListTemp() {
 	go func() {
 		//xiqu（戏曲）9493
 		tempScoreReptileListType2(BaseUrl + "xiqu")
-	}()*/
+	}()
 
 	go func() {
 		//puyou（谱友园地）12189
 		tempScoreReptileListType2(BaseUrl + "puyou")
 	}()
 
-	/*go func() {
+	go func() {
 		//minge（民歌）66517
 		tempScoreReptileListType3(BaseUrl + "minge", "民歌")
-	}()*/
+	}()
 
 	go func() {
 		//meisheng（美声）3777
@@ -73,7 +73,7 @@ func startProcessListTemp() {
 	go func() {
 		//shaoer（少儿）14185
 		tempScoreReptileListType3(BaseUrl+"shaoer", "少儿")
-	}()
+	}()*/
 
 	go func() {
 		//hechang（合唱）6906

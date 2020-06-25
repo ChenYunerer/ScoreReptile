@@ -17,19 +17,23 @@ import (
 var scoreBaseInfoChain = make(chan model.ScoreBaseInfo, 2000)
 
 func startProcessBaseInfo() {
+	threadCount := 10
 	scoreListTempCount := db.CountScoreListTemp()
 	log.Println(scoreListTempCount)
-
-	go func() {
-		baseInfoReptile()
-	}()
-
+	scoreListTemps, err := db.GetScoreListTemps()
+	if err != nil {
+		log.Println(err)
+	}
+	scoreListTempsArray := splitScoreListTempArray(scoreListTemps, threadCount)
+	for _, scoreListTemps := range scoreListTempsArray {
+		go baseInfoReptile(scoreListTemps)
+	}
 	i := 0
 	for {
 		select {
 		case s := <-scoreBaseInfoChain:
 			i++
-			log.Println("processing data index ", i)
+			log.Println("processing data index ", i, " all count ", scoreListTempCount)
 			log.Println("插入数据", s)
 			err := db.InsertScoreBaseInfo(s)
 			if err != nil {
@@ -45,11 +49,7 @@ func startProcessBaseInfo() {
 	}
 }
 
-func baseInfoReptile() {
-	scoreListTemps, err := db.GetScoreListTemps()
-	if err != nil {
-		log.Println(err)
-	}
+func baseInfoReptile(scoreListTemps []model.ScoreListTemp) {
 	for _, s := range scoreListTemps {
 		href := s.ScoreHref
 		//查询该数据是否已经处理过
@@ -59,6 +59,7 @@ func baseInfoReptile() {
 			continue
 		}
 		//获取HTML
+		log.Println(s)
 		reader, err := net.GetRequestForReader(BaseUrl + href)
 		if err != nil {
 			log.Println(err)
@@ -74,7 +75,11 @@ func baseInfoReptile() {
 		scoreBaseInfo.ScoreUploader = s.ScoreUploader
 		scoreBaseInfo.ScoreUploadTime = s.ScoreUploadTime
 		//解析HTML
-		document, _ := goquery.NewDocumentFromReader(reader)
+		document, err := goquery.NewDocumentFromReader(reader)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 		selection := document.Find(".content .content_head")
 		fullName := selection.Find("h1").Text()
 		scoreBaseInfo.ScoreName = fullName
@@ -151,4 +156,24 @@ func getScoreViewCount(id int) int {
 	viewCountStr, _ := net.GetRequest(BaseUrl + "Opern-cnum-id-" + strconv.Itoa(id) + ".html")
 	viewCount, _ := strconv.Atoi(viewCountStr)
 	return viewCount
+}
+
+func splitScoreListTempArray(arr []model.ScoreListTemp, num int) [][]model.ScoreListTemp {
+	max := len(arr)
+	var segmens = make([][]model.ScoreListTemp, 0)
+	if max < num {
+		return append(segmens, arr)
+	}
+	quantity := max / num
+	end := int(0)
+	for i := int(1); i <= num; i++ {
+		qu := i * quantity
+		if i != num {
+			segmens = append(segmens, arr[i-1+end:qu])
+		} else {
+			segmens = append(segmens, arr[i-1+end:])
+		}
+		end = qu - i
+	}
+	return segmens
 }

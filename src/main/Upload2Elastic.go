@@ -8,7 +8,7 @@ import (
 )
 
 func Upload2Elastic() {
-	scoreBaseInfos, err := db.GetScoreBaseInfo(500)
+	scoreBaseInfos, err := db.GetScoreBaseInfo(50000)
 	if err != nil {
 		log.Panic(err)
 	}

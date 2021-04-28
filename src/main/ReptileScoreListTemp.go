@@ -15,7 +15,7 @@ import (
 
 const BaseUrl = "http://www.qupu123.com/"
 
-var scoreListTempChain = make(chan model.ScoreListTemp, 2000)
+var scoreListTempChain = make(chan model.ScoreListTemp, 10000)
 
 func startProcessListTemp() {
 	//jipu（制谱园地） yuanchuang(原创专栏) qiyue（器乐）xiqu（戏曲）puyou（谱友园地）
@@ -26,12 +26,12 @@ func startProcessListTemp() {
 	//minge（民歌）meisheng（美声）tongsu（通俗）waiguo（外国）shaoer（少儿）hechang（合唱） 使用tempScoreReptileListType3
 
 	/*go func() {
-		//jipu（制谱园地）42790
+		//jipu（制谱园地）53703
 		tempScoreReptileListType1(BaseUrl+"jipu", "制谱园地")
 	}()
 
 	go func() {
-		//yuanchuang(原创专栏) 16272 ok
+		//yuanchuang(原创专栏) 22192
 		tempScoreReptileListType1(BaseUrl+"yuanchuang", "原创专栏")
 	}()
 
@@ -63,7 +63,7 @@ func startProcessListTemp() {
 	go func() {
 		//tongsu（通俗）17484
 		tempScoreReptileListType3(BaseUrl+"tongsu", "通俗")
-	}()
+	}()*/
 
 	go func() {
 		//waiguo（外国）6728
@@ -73,7 +73,7 @@ func startProcessListTemp() {
 	go func() {
 		//shaoer（少儿）14185
 		tempScoreReptileListType3(BaseUrl+"shaoer", "少儿")
-	}()*/
+	}()
 
 	go func() {
 		//hechang（合唱）6906
@@ -96,8 +96,8 @@ func startProcessListTemp() {
 			} else {
 				log.Println("数据已存在")
 			}
-		default:
-			log.Println("no data waiting", i)
+			//default:
+			//log.Println("no data waiting", i)
 		}
 	}
 }
@@ -141,6 +141,8 @@ func tempScoreReptileListType1(url, category string) {
 				tempScoreReptileListType1(BaseUrl+nextPageHref, category)
 			}
 		})
+	} else {
+		log.Println("已经到最后一页了")
 	}
 }
 
@@ -184,6 +186,8 @@ func tempScoreReptileListType2(url string) {
 				tempScoreReptileListType2(BaseUrl + nextPageHref)
 			}
 		})
+	} else {
+		log.Println("已经到最后一页了")
 	}
 }
 
@@ -226,5 +230,7 @@ func tempScoreReptileListType3(url, category string) {
 				tempScoreReptileListType3(BaseUrl+nextPageHref, category)
 			}
 		})
+	} else {
+		log.Println("已经到最后一页了")
 	}
 }

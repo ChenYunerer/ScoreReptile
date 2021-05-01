@@ -3,7 +3,7 @@ package main
 func main() {
 	//startProcessListTemp()
 	//startProcessBaseInfo()
-	//startProcessPictureInfo()
+	startProcessPictureInfo()
 	//startDownloadScorePicture()
-	Upload2Elastic()
+	//Upload2Elastic()
 }

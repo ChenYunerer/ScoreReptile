@@ -22,7 +22,7 @@ func InsertScorePictureInfo(socrePictureInfo model.ScorePictureInfo) error {
 		return err
 	}
 	rows, errs := res.RowsAffected()
-	log.Println(res.RowsAffected())
+	//log.Println(res.RowsAffected())
 	if rows < 1 {
 		log.Println("添加数据库条数小于1原因是 :%v", errs)
 		return err

@@ -19,7 +19,7 @@ func startProcessPictureInfo() {
 }
 
 func scorePictureInfoReptile() {
-	threadCount := 36
+	threadCount := 6
 	wg := waitGroup
 	scoreBaseInfos, err := db.GetUnCountPicScoreBaseInfo()
 	if err != nil {
@@ -28,19 +28,18 @@ func scorePictureInfoReptile() {
 	scoreBaseInfosArray := splitScoreBaseInfoArray(scoreBaseInfos, threadCount)
 	for _, scoreBaseInfos := range scoreBaseInfosArray {
 		wg.Add(1)
-		go func() {
+		go func(items []model.ScoreBaseInfo) {
 			defer wg.Done()
-			pictureInfoReptile(scoreBaseInfos)
-		}()
+			pictureInfoReptile(items)
+		}(scoreBaseInfos)
 	}
 	wg.Wait()
 }
 
 func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) {
 	for index, s := range scoreBaseInfos {
-		log.Println("data index : ", index, " name ", s.ScoreName, " href ", s.ScoreHref)
 		url := BaseUrl + "Mobile-view-id-" + strconv.Itoa(s.ScoreId) + ".html"
-		log.Println(url)
+		log.Println("data-index: ", index, " name: ", s.ScoreName, " href: ", s.ScoreHref, " mobile-url: ", url)
 		reader, err := net.GetRequestForReader(url)
 		if err != nil {
 			log.Println(err)
@@ -79,7 +78,7 @@ func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) {
 			if err != nil {
 				log.Println("数据库插入失败", err)
 			} else {
-				log.Println("数据库插入成功")
+				//log.Println("数据库插入成功")
 			}
 		})
 	}

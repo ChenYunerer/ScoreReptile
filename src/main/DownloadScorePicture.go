@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 )
 
-var threadCount = 12
+var picDownloadThreadNo = 12
 var limit int64 = 10000
 var localPath = "score_picture/"
 
@@ -30,7 +30,7 @@ func startDownloadScorePicture() {
 		log.Println(scorePictureInfo)
 		scorePictureInfoChain <- scorePictureInfo
 	}
-	for i := 0; i < threadCount; i++ {
+	for i := 0; i < picDownloadThreadNo; i++ {
 		waitGroup.Add(1)
 		go func(threadName string) {
 			for {

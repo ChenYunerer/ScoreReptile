@@ -13,19 +13,21 @@ import (
 	"strings"
 )
 
+var picGetThreadNum = 6
+var picCountThreadNum = 10
+
 func startProcessPictureInfo() {
 	scorePictureInfoReptile()
 	processScorePictureCount()
 }
 
 func scorePictureInfoReptile() {
-	threadCount := 6
 	wg := waitGroup
 	scoreBaseInfos, err := db.GetUnCountPicScoreBaseInfo()
 	if err != nil {
 		log.Panic(err)
 	}
-	scoreBaseInfosArray := splitScoreBaseInfoArray(scoreBaseInfos, threadCount)
+	scoreBaseInfosArray := splitScoreBaseInfoArray(scoreBaseInfos, picGetThreadNum)
 	for _, scoreBaseInfos := range scoreBaseInfosArray {
 		wg.Add(1)
 		go func(items []model.ScoreBaseInfo) {
@@ -107,15 +109,23 @@ func processScorePictureCount() {
 	if err != nil {
 		log.Panic(err)
 	}
-	for index, s := range scoreBaseInfos {
+	scoreBaseInfosList := splitScoreBaseInfoArray(scoreBaseInfos, picCountThreadNum)
+	for _, items := range scoreBaseInfosList {
+		go func(arr []model.ScoreBaseInfo) {
+			countAndUpdatePicCount(arr)
+		}(items)
+	}
+}
+
+func countAndUpdatePicCount(arr []model.ScoreBaseInfo) {
+	for index, s := range arr {
 		log.Println("update score picture count index : ", index, " name ", s.ScoreName, " href ", s.ScoreHref)
 		count := db.CountScorePictureInfo(s.ScoreHref)
 		if count == 0 {
 			continue
 		}
 		success := db.UpdateScoreBaseInfoPictureCount(s.ScoreHref, count)
-		log.Println("score picture count : ", count)
-		log.Println(success)
+		log.Println("score picture count : ", count, " update result: ", success)
 	}
 }
 

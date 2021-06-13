@@ -6,50 +6,69 @@ import (
 	"ScoreReptile/src/net"
 	"github.com/PuerkitoBio/goquery"
 	"log"
+	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 /**
  * 获取曲谱信息
  */
 
-var scoreBaseInfoChain = make(chan model.ScoreBaseInfo, 2000)
+func startProcessBaseInfo(parentTaskInfo model.ReptileTaskInfo) {
+	//生成一个任务
+	taskInfo := model.CreateBasicTaskInfo("曲谱基本数据抓取任务")
+	taskInfo.Top_task_id = parentTaskInfo.Task_id
+	taskInfo.Parent_task_id = parentTaskInfo.Task_id
+	db.Engine.InsertOne(taskInfo)
 
-func startProcessBaseInfo() {
-	threadCount := 10
-	scoreListTempCount := db.CountScoreListTemp()
-	log.Println(scoreListTempCount)
-	scoreListTemps, err := db.GetScoreListTemps()
+	//获取任务需要处理的数据
+	var scoreListTemps []model.ScoreListTemp
+	err := db.Engine.Where(model.TopTaskId+"= ?", parentTaskInfo.Task_id).Find(&scoreListTemps)
 	if err != nil {
-		log.Println(err)
+		log.Println("get scoreListTemps err: ", err)
 	}
+	scoreListTempCount := len(scoreListTemps)
+	log.Println("scoreListTempCount： ", scoreListTempCount)
+
+	//将数据分批多线程处理
+	threadCount := runtime.NumCPU() * 2
+	scoreBaseInfoList := make([]model.ScoreBaseInfo, 0)
 	scoreListTempsArray := splitScoreListTempArray(scoreListTemps, threadCount)
+	wg := waitGroup
 	for _, scoreListTemps := range scoreListTempsArray {
-		go baseInfoReptile(scoreListTemps)
+		wg.Add(1)
+		go func(scoreListTemps []model.ScoreListTemp) {
+			defer wg.Done()
+			_scoreBaseInfoList := baseInfoReptile(scoreListTemps, *taskInfo)
+			scoreBaseInfoList = append(scoreBaseInfoList, _scoreBaseInfoList...)
+		}(scoreListTemps)
 	}
-	i := 0
-	for {
-		select {
-		case s := <-scoreBaseInfoChain:
-			i++
-			log.Println("processing data index ", i, " all count ", scoreListTempCount)
-			log.Println("插入数据", s)
-			err := db.InsertScoreBaseInfo(s)
-			if err != nil {
-				log.Println(err)
-			} else {
-				if db.UpdateScoreListTempStatus(s.ScoreHref) {
-					log.Println("更新状态成功")
-				} else {
-					log.Println("更新状态失败")
-				}
-			}
+	wg.Wait()
+	//数据入库
+	for _, s := range scoreBaseInfoList {
+		log.Println("插入数据", s)
+		_, err := db.Engine.Insert(s)
+		if err != nil {
+			log.Println("Insert scoreBaseInfo err: ", err)
 		}
 	}
+
+	//更新任务信息
+	taskInfo.Task_process_data_num = len(scoreBaseInfoList)
+	endTime := time.Now()
+	taskInfo.Task_status = 2
+	taskInfo.Task_end_time = endTime
+	taskInfo.Update_time = endTime
+	taskInfo.Task_time_consume = taskInfo.Task_end_time.Sub(taskInfo.Task_start_time).Seconds()
+	db.Engine.Update(taskInfo, &model.ReptileTaskInfo{
+		Task_id: taskInfo.Task_id,
+	})
 }
 
-func baseInfoReptile(scoreListTemps []model.ScoreListTemp) {
+func baseInfoReptile(scoreListTemps []model.ScoreListTemp, taskInfo model.ReptileTaskInfo) []model.ScoreBaseInfo {
+	scoreBaseInfoList := make([]model.ScoreBaseInfo, 0)
 	for _, s := range scoreListTemps {
 		href := s.ScoreHref
 		//查询该数据是否已经处理过
@@ -66,7 +85,9 @@ func baseInfoReptile(scoreListTemps []model.ScoreListTemp) {
 			continue
 		}
 		var scoreBaseInfo model.ScoreBaseInfo
-		//封住已知原始数据
+		//封装已知原始数据
+		scoreBaseInfo.TopTaskId = taskInfo.Top_task_id
+		scoreBaseInfo.TaskId = taskInfo.Task_id
 		scoreBaseInfo.ScoreName = s.ScoreName
 		scoreBaseInfo.ScoreHref = s.ScoreHref
 		scoreBaseInfo.ScoreAuthor = s.ScoreAuthor
@@ -132,8 +153,9 @@ func baseInfoReptile(scoreListTemps []model.ScoreListTemp) {
 		scoreCoverPicture, _ := document.Find(".imageList a").Attr("href")
 		scoreBaseInfo.ScoreCoverPicture = scoreCoverPicture
 
-		scoreBaseInfoChain <- scoreBaseInfo
+		scoreBaseInfoList = append(scoreBaseInfoList, scoreBaseInfo)
 	}
+	return scoreBaseInfoList
 }
 
 //从href中解析id

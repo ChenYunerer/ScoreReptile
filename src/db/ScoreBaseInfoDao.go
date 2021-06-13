@@ -8,7 +8,7 @@ import (
 )
 
 func InsertScoreBaseInfo(scoreBaseInfo model.ScoreBaseInfo) error {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return err
@@ -32,7 +32,7 @@ func InsertScoreBaseInfo(scoreBaseInfo model.ScoreBaseInfo) error {
 }
 
 func IsScoreBaseInfoExist(href string) bool {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return false
@@ -48,7 +48,7 @@ func IsScoreBaseInfoExist(href string) bool {
 }
 
 func UpdateScoreBaseInfoId(href string, id int) bool {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return false
@@ -69,7 +69,7 @@ func UpdateScoreBaseInfoId(href string, id int) bool {
 
 func GetScoreBaseInfo(count int) ([]model.ScoreBaseInfo, error) {
 	scoreBaseInfos := make([]model.ScoreBaseInfo, 0)
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return nil, err
@@ -104,7 +104,7 @@ func GetScoreBaseInfo(count int) ([]model.ScoreBaseInfo, error) {
 
 func GetUnCountPicScoreBaseInfo() ([]model.ScoreBaseInfo, error) {
 	scoreBaseInfos := make([]model.ScoreBaseInfo, 0)
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return nil, err
@@ -138,7 +138,7 @@ func GetUnCountPicScoreBaseInfo() ([]model.ScoreBaseInfo, error) {
 }
 
 func UpdateScoreBaseInfoPictureCount(href string, count int64) bool {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return false

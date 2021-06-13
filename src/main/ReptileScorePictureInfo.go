@@ -9,36 +9,70 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/robertkrimen/otto"
 	"log"
+	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
-var picGetThreadNum = 6
-var picCountThreadNum = 10
+var picGetThreadNum = runtime.NumCPU() * 2
 
-func startProcessPictureInfo() {
-	scorePictureInfoReptile()
-	processScorePictureCount()
-}
-
-func scorePictureInfoReptile() {
-	wg := waitGroup
-	scoreBaseInfos, err := db.GetUnCountPicScoreBaseInfo()
+func startProcessPictureInfo(parentTaskInfo model.ReptileTaskInfo) {
+	//生成任务
+	taskInfo := model.CreateBasicTaskInfo("抓取曲谱图片任务")
+	taskInfo.Top_task_id = parentTaskInfo.Top_task_id
+	taskInfo.Parent_task_id = parentTaskInfo.Task_id
+	_, err := db.Engine.InsertOne(taskInfo)
 	if err != nil {
-		log.Panic(err)
+		log.Println("InsertOne taskInfo err: ", err)
 	}
-	scoreBaseInfosArray := splitScoreBaseInfoArray(scoreBaseInfos, picGetThreadNum)
+
+	//获取需要处理的数据
+	var scoreBaseInfoList []model.ScoreBaseInfo
+	err = db.Engine.Where(model.TopTaskId+"= ?", taskInfo.Top_task_id).Find(&scoreBaseInfoList)
+	if err != nil {
+		log.Println("get scoreBaseInfoList err: ", err)
+	}
+	log.Println("scoreBaseInfoList count： ", len(scoreBaseInfoList))
+
+	//分割数据
+	scoreBaseInfosArray := splitScoreBaseInfoArray(scoreBaseInfoList, picGetThreadNum)
+	scorePictureInfoList := make([]model.ScorePictureInfo, 0)
+
+	//多线程处理
+	wg := waitGroup
 	for _, scoreBaseInfos := range scoreBaseInfosArray {
 		wg.Add(1)
 		go func(items []model.ScoreBaseInfo) {
 			defer wg.Done()
-			pictureInfoReptile(items)
+			_scorePictureInfoList := pictureInfoReptile(items)
+			scorePictureInfoList = append(scorePictureInfoList, _scorePictureInfoList...)
 		}(scoreBaseInfos)
 	}
 	wg.Wait()
+
+	//插入数据到数据库
+	for _, item := range scorePictureInfoList {
+		_, err := db.Engine.InsertOne(item)
+		if err != nil {
+			log.Println("InsertOne scorePictureInfo err: ", err)
+		}
+	}
+
+	//更新任务信息
+	taskInfo.Task_process_data_num = len(scorePictureInfoList)
+	endTime := time.Now()
+	taskInfo.Task_status = 2
+	taskInfo.Task_end_time = endTime
+	taskInfo.Update_time = endTime
+	taskInfo.Task_time_consume = taskInfo.Task_end_time.Sub(taskInfo.Task_start_time).Seconds()
+	db.Engine.Update(taskInfo, &model.ReptileTaskInfo{
+		Task_id: taskInfo.Task_id,
+	})
 }
 
-func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) {
+func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) []model.ScorePictureInfo {
+	scorePictureInfoList := make([]model.ScorePictureInfo, 0)
 	for index, s := range scoreBaseInfos {
 		url := BaseUrl + "Mobile-view-id-" + strconv.Itoa(s.ScoreId) + ".html"
 		log.Println("data-index: ", index, " name: ", s.ScoreName, " href: ", s.ScoreHref, " mobile-url: ", url)
@@ -76,14 +110,10 @@ func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) {
 				ScorePictureIndex: i,
 				ScorePictureHref:  pictureHref,
 			}
-			err := db.InsertScorePictureInfo(scorePictureInfo)
-			if err != nil {
-				log.Println("数据库插入失败", err)
-			} else {
-				//log.Println("数据库插入成功")
-			}
+			scorePictureInfoList = append(scorePictureInfoList, scorePictureInfo)
 		})
 	}
+	return scorePictureInfoList
 }
 
 func initJSVm(vm *otto.Otto, document *goquery.Document) *otto.Otto {
@@ -102,31 +132,6 @@ func initJSVm(vm *otto.Otto, document *goquery.Document) *otto.Otto {
 		}
 	})
 	return vm
-}
-
-func processScorePictureCount() {
-	scoreBaseInfos, err := db.GetUnCountPicScoreBaseInfo()
-	if err != nil {
-		log.Panic(err)
-	}
-	scoreBaseInfosList := splitScoreBaseInfoArray(scoreBaseInfos, picCountThreadNum)
-	for _, items := range scoreBaseInfosList {
-		go func(arr []model.ScoreBaseInfo) {
-			countAndUpdatePicCount(arr)
-		}(items)
-	}
-}
-
-func countAndUpdatePicCount(arr []model.ScoreBaseInfo) {
-	for index, s := range arr {
-		log.Println("update score picture count index : ", index, " name ", s.ScoreName, " href ", s.ScoreHref)
-		count := db.CountScorePictureInfo(s.ScoreHref)
-		if count == 0 {
-			continue
-		}
-		success := db.UpdateScoreBaseInfoPictureCount(s.ScoreHref, count)
-		log.Println("score picture count : ", count, " update result: ", success)
-	}
 }
 
 func splitScoreBaseInfoArray(arr []model.ScoreBaseInfo, num int) [][]model.ScoreBaseInfo {

@@ -8,7 +8,7 @@ import (
 )
 
 func DeteleScoreListTemps() error {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return err
@@ -29,7 +29,7 @@ func DeteleScoreListTemps() error {
 }
 
 func InsertScoreListTemp(scoreListTemp model.ScoreListTemp) error {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return err
@@ -52,7 +52,7 @@ func InsertScoreListTemp(scoreListTemp model.ScoreListTemp) error {
 }
 
 func IsScoreListTempExist(scoreListTemp model.ScoreListTemp) bool {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return false
@@ -69,7 +69,7 @@ func IsScoreListTempExist(scoreListTemp model.ScoreListTemp) bool {
 
 func GetScoreListTemps() ([]model.ScoreListTemp, error) {
 	scoreListTemps := make([]model.ScoreListTemp, 0)
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return nil, err
@@ -108,7 +108,7 @@ func GetScoreListTemps() ([]model.ScoreListTemp, error) {
 }
 
 func CountScoreListTemp() int {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return 0
@@ -124,7 +124,7 @@ func CountScoreListTemp() int {
 }
 
 func UpdateScoreListTempStatus(href string) bool {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return false

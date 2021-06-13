@@ -8,7 +8,7 @@ import (
 )
 
 func InsertScorePictureInfo(socrePictureInfo model.ScorePictureInfo) error {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return err
@@ -31,7 +31,7 @@ func InsertScorePictureInfo(socrePictureInfo model.ScorePictureInfo) error {
 }
 
 func CountScorePictureInfo(scoreHref string) int64 {
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return 0
@@ -49,7 +49,7 @@ func CountScorePictureInfo(scoreHref string) int64 {
 
 func GetScorePictureInfo(limit int64) ([]model.ScorePictureInfo, error) {
 	scorePictureInfos := make([]model.ScorePictureInfo, 0)
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("mysql", DataSourceName)
 	if err != nil {
 		log.Println("打开数据库失败 : %v", err)
 		return nil, err

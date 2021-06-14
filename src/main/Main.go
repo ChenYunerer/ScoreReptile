@@ -29,9 +29,7 @@ func startCronJob() {
 
 func startHttpServer() {
 	r := gin.Default()
-	r.GET("/a", test2)
-	r.GET("/b", test1)
-	r.GET("/c", test2)
+	r.GET("/getTaskList", getTaskList)
 	err := r.Run("0.0.0.0:8080")
 	if err != nil {
 		log.Panic("http server start err: ", err)
@@ -71,17 +69,10 @@ func startReptileTask() {
 	})
 }
 
-func test1(c *gin.Context) {
-	taskId := c.Query("taskId")
-	if taskId == "" {
-		c.JSON(200, http.GenErrorResponse("taskId不可为空"))
-		return
-	}
-	var taskInfo model.ReptileTaskInfo
-	db.Engine.Where(model.TaskId+"= ?", taskId).Get(&taskInfo)
-	//第二部操作 抓取曲谱基本信息
-	startProcessBaseInfo(taskInfo)
-	c.JSON(200, http.GenSuccessResponse())
+func getTaskList(c *gin.Context) {
+	var taskInfoList []model.ReptileTaskInfo
+	db.Engine.Where(model.ParentTaskId+"= ?", "").Desc(model.CreateTime).Find(&taskInfoList)
+	c.JSON(200, http.GenSuccessResponseWithData(taskInfoList))
 }
 
 func test2(c *gin.Context) {
@@ -91,7 +82,7 @@ func test2(c *gin.Context) {
 		return
 	}
 	var taskInfo model.ReptileTaskInfo
-	db.Engine.Where(model.TaskId+"= ?", taskId).Get(&taskInfo)
+	db.Engine.Where(model.ParentTaskId+"= ?", "").OrderBy(model.CreateTime).Find(&taskInfo)
 	//第二部操作 抓取曲谱基本信息
 	startProcessBaseInfo(taskInfo)
 	c.JSON(200, http.GenSuccessResponse())

@@ -1,3 +1,3 @@
 #!/bin/bash
-rm -rf main
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./src/main
+rm -rf soupu_admin
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o soupu_admin ./src/main

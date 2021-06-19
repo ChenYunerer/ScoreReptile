@@ -17,7 +17,7 @@ import (
 
 var picGetThreadNum = runtime.NumCPU() * 2
 
-func startProcessPictureInfo(parentTaskInfo model.ReptileTaskInfo) {
+func startProcessPictureInfo(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
 	//生成任务
 	taskInfo := model.CreateBasicTaskInfo("抓取曲谱图片任务")
 	taskInfo.Top_task_id = parentTaskInfo.Top_task_id
@@ -69,6 +69,7 @@ func startProcessPictureInfo(parentTaskInfo model.ReptileTaskInfo) {
 	db.Engine.Update(taskInfo, &model.ReptileTaskInfo{
 		Task_id: taskInfo.Task_id,
 	})
+	return *taskInfo
 }
 
 func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) []model.ScorePictureInfo {

@@ -29,8 +29,12 @@ func startCronJob() {
 
 func startHttpServer() {
 	r := gin.Default()
-	r.GET("/getTaskList", getTaskList)
-	err := r.Run("0.0.0.0:8080")
+	r.BasePath()
+	rg := r.Group("/admin/api")
+	{
+		rg.GET("/getTopTaskList", getTopTaskList)
+	}
+	err := r.Run("0.0.0.0:7002")
 	if err != nil {
 		log.Panic("http server start err: ", err)
 	}
@@ -44,18 +48,23 @@ func startReptileTask() {
 	if _, err := db.Engine.InsertOne(taskInfo); err != nil {
 		log.Println(err)
 	}
+	childTaskInfoList := make([]model.ReptileTaskInfo, 0)
 
 	//执行第一步操作 抓取各个类目的列表数据
-	startProcessListTemp(*taskInfo)
+	processListTempTaskInfo := startProcessListTemp(*taskInfo)
+	childTaskInfoList = append(childTaskInfoList, processListTempTaskInfo)
 
 	//第二步操作 抓取曲谱基本信息
-	startProcessBaseInfo(*taskInfo)
+	processBaseInfoTaskInfo := startProcessBaseInfo(*taskInfo)
+	childTaskInfoList = append(childTaskInfoList, processBaseInfoTaskInfo)
 
 	//第三步操作 抓取曲谱图片
-	startProcessPictureInfo(*taskInfo)
+	processPictureInfoTaskInfo := startProcessPictureInfo(*taskInfo)
+	childTaskInfoList = append(childTaskInfoList, processPictureInfoTaskInfo)
 
 	//第四步操作 计算曲谱图片数量
-	processScorePictureCount(*taskInfo)
+	processScorePictureCountTaskInfo := startProcessScorePictureCount(*taskInfo)
+	childTaskInfoList = append(childTaskInfoList, processScorePictureCountTaskInfo)
 
 	//更新任务
 	taskInfo.Task_status = 2
@@ -64,26 +73,64 @@ func startReptileTask() {
 	timeConsume := endTime.Sub(taskInfo.Task_start_time)
 	taskInfo.Task_time_consume = timeConsume.Seconds()
 	taskInfo.Update_time = endTime
+	taskProcessDataNum := 0
+	for _, item := range childTaskInfoList {
+		taskProcessDataNum = taskProcessDataNum + item.Task_process_data_num
+	}
+	taskInfo.Task_process_data_num = taskProcessDataNum
 	db.Engine.Update(taskInfo, &model.ReptileTaskInfo{
 		Task_id: taskInfo.Task_id,
 	})
 }
 
-func getTaskList(c *gin.Context) {
+func getTopTaskList(c *gin.Context) {
 	var taskInfoList []model.ReptileTaskInfo
-	db.Engine.Where(model.ParentTaskId+"= ?", "").Desc(model.CreateTime).Find(&taskInfoList)
-	c.JSON(200, http.GenSuccessResponseWithData(taskInfoList))
+	db.Engine.Desc(model.CreateTime).Find(&taskInfoList)
+	// 任务分组
+	var topTaskList []*http.ReptileTaskWithChild
+	for _, item := range taskInfoList {
+		if item.Parent_task_id == "" {
+			topTaskInfo := genReptileTaskWithChild(item)
+			genTaskDetail(topTaskInfo, taskInfoList)
+			topTaskList = append(topTaskList, topTaskInfo)
+		}
+	}
+	c.JSON(200, http.GenSuccessResponseWithData(topTaskList))
 }
 
-func test2(c *gin.Context) {
-	taskId := c.Query("taskId")
-	if taskId == "" {
-		c.JSON(200, http.GenErrorResponse("taskId不可为空"))
+func genTaskDetail(taskInfo *http.ReptileTaskWithChild, taskInfoList []model.ReptileTaskInfo) {
+	subTaskInfoList := getTaskInfoListByParentTaskId(taskInfoList, taskInfo.Task_id)
+	if len(subTaskInfoList) == 0 {
 		return
 	}
-	var taskInfo model.ReptileTaskInfo
-	db.Engine.Where(model.ParentTaskId+"= ?", "").OrderBy(model.CreateTime).Find(&taskInfo)
-	//第二部操作 抓取曲谱基本信息
-	startProcessBaseInfo(taskInfo)
-	c.JSON(200, http.GenSuccessResponse())
+	taskInfo.SubTaskList = genReptileTaskWithChildList(subTaskInfoList)
+	for _, item := range taskInfo.SubTaskList {
+		genTaskDetail(item, taskInfoList)
+	}
+}
+
+func getTaskInfoListByParentTaskId(taskInfo []model.ReptileTaskInfo, parentTaskId string) []model.ReptileTaskInfo {
+	taskInfoList := make([]model.ReptileTaskInfo, 0)
+	for _, item := range taskInfo {
+		if item.Parent_task_id == parentTaskId {
+			taskInfoList = append(taskInfoList, item)
+		}
+	}
+	return taskInfoList
+}
+
+func genReptileTaskWithChild(taskInfo model.ReptileTaskInfo) *http.ReptileTaskWithChild {
+	return &http.ReptileTaskWithChild{
+		ReptileTaskInfo: taskInfo,
+	}
+}
+
+func genReptileTaskWithChildList(taskInfoList []model.ReptileTaskInfo) []*http.ReptileTaskWithChild {
+	resultList := make([]*http.ReptileTaskWithChild, 0)
+	for _, item := range taskInfoList {
+		resultList = append(resultList, &http.ReptileTaskWithChild{
+			ReptileTaskInfo: item,
+		})
+	}
+	return resultList
 }

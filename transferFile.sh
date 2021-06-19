@@ -1,2 +1,2 @@
 #!/bin/bash
-scp main root@yuner.fun:/root
+scp soupu_admin root@yuner.fun:/root/soupu_admin

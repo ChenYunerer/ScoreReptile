@@ -16,7 +16,7 @@ import (
  * 获取曲谱信息
  */
 
-func startProcessBaseInfo(parentTaskInfo model.ReptileTaskInfo) {
+func startProcessBaseInfo(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
 	//生成一个任务
 	taskInfo := model.CreateBasicTaskInfo("曲谱基本数据抓取任务")
 	taskInfo.Top_task_id = parentTaskInfo.Task_id
@@ -65,6 +65,7 @@ func startProcessBaseInfo(parentTaskInfo model.ReptileTaskInfo) {
 	db.Engine.Update(taskInfo, &model.ReptileTaskInfo{
 		Task_id: taskInfo.Task_id,
 	})
+	return *taskInfo
 }
 
 func baseInfoReptile(scoreListTemps []model.ScoreListTemp, taskInfo model.ReptileTaskInfo) []model.ScoreBaseInfo {

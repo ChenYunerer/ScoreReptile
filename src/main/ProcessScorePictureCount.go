@@ -10,7 +10,7 @@ import (
 
 var picCountThreadNum = runtime.NumCPU() * 2
 
-func processScorePictureCount(parentTaskInfo model.ReptileTaskInfo) {
+func startProcessScorePictureCount(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
 	taskInfo := model.CreateBasicTaskInfo("计算曲谱图片任务")
 	taskInfo.Top_task_id = parentTaskInfo.Top_task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
@@ -51,6 +51,7 @@ func processScorePictureCount(parentTaskInfo model.ReptileTaskInfo) {
 	db.Engine.Update(taskInfo, &model.ReptileTaskInfo{
 		Task_id: taskInfo.Task_id,
 	})
+	return *taskInfo
 }
 
 func countAndUpdatePicCount(arr []model.ScoreBaseInfo) {

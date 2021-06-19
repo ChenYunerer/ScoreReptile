@@ -88,9 +88,9 @@ func init() {
 //jipu（制谱园地） yuanchuang(原创专栏) 使用tempScoreReptileListType1
 //qiyue（器乐）xiqu（戏曲）puyou(谱友园地) 使用tempScoreReptileListType2
 //minge（民歌）meisheng（美声）tongsu（通俗）waiguo（外国）shaoer（少儿）hechang（合唱） 使用tempScoreReptileListType3
-func startProcessListTemp(parentTaskInfo model.ReptileTaskInfo) {
+func startProcessListTemp(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
 	// 创建并插入任务
-	taskInfo := model.CreateBasicTaskInfo("ListTempTask")
+	taskInfo := model.CreateBasicTaskInfo("各分类列表任务")
 	taskInfo.Top_task_id = parentTaskInfo.Task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
 	db.Engine.InsertOne(taskInfo)
@@ -136,13 +136,20 @@ func startProcessListTemp(parentTaskInfo model.ReptileTaskInfo) {
 	taskInfo.Task_end_time = endTime
 	taskInfo.Update_time = endTime
 	taskInfo.Task_time_consume = taskInfo.Task_end_time.Sub(taskInfo.Task_start_time).Seconds()
+	taskProcessDataNum := 0
+	for _, item := range taskWrapperList {
+		taskProcessDataNum = taskProcessDataNum + item.ReptileTaskInfo.Task_process_data_num
+	}
+	taskInfo.Task_process_data_num = taskProcessDataNum
 	db.Engine.Update(taskInfo, &model.ReptileTaskInfo{
 		Task_id: taskInfo.Task_id,
 	})
+	return *taskInfo
 }
 
 func processChildTask(taskName string, parentTaskInfo model.ReptileTaskInfo, tempScoreReptileFunc func(scoreListTempList *[]*model.ScoreListTemp)) model.ReptileTaskWrapper {
 	taskInfo := model.CreateBasicTaskInfo(taskName)
+	taskInfo.Top_task_id = parentTaskInfo.Top_task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
 	scoreListTempList := make([]*model.ScoreListTemp, 0)
 	tempScoreReptileFunc(&scoreListTempList)

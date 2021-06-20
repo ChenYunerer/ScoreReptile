@@ -1,9 +1,9 @@
-package main
+package job
 
 import (
 	"ScoreReptile/src/db"
 	"ScoreReptile/src/model"
-	"ScoreReptile/src/net"
+	"ScoreReptile/src/util"
 	"io/ioutil"
 	"log"
 	"os"
@@ -38,7 +38,7 @@ func startDownloadScorePicture() {
 				case scorePictureInfo := <-scorePictureInfoChain:
 					atomic.AddInt64(&index, 1)
 					log.Print(threadName, " processing index: ", index)
-					reader, err := net.GetRequestForReader(BaseUrl + scorePictureInfo.ScorePictureHref)
+					reader, err := util.GetRequestForReader(BaseUrl + scorePictureInfo.ScorePictureHref)
 					if err != nil {
 						log.Println(err)
 					} else {

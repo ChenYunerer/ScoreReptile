@@ -1,10 +1,10 @@
-package main
+package job
 
 import (
 	"ScoreReptile/src/db"
 	"ScoreReptile/src/js"
 	"ScoreReptile/src/model"
-	"ScoreReptile/src/net"
+	"ScoreReptile/src/util"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/robertkrimen/otto"
@@ -77,7 +77,7 @@ func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) []model.ScorePictu
 	for index, s := range scoreBaseInfos {
 		url := BaseUrl + "Mobile-view-id-" + strconv.Itoa(s.ScoreId) + ".html"
 		log.Println("data-index: ", index, " name: ", s.ScoreName, " href: ", s.ScoreHref, " mobile-url: ", url)
-		reader, err := net.GetRequestForReader(url)
+		reader, err := util.GetRequestForReader(url)
 		if err != nil {
 			log.Println(err)
 			continue

@@ -1,9 +1,9 @@
-package main
+package job
 
 import (
 	"ScoreReptile/src/db"
 	"ScoreReptile/src/model"
-	"ScoreReptile/src/net"
+	"ScoreReptile/src/util"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"runtime"
@@ -80,7 +80,7 @@ func baseInfoReptile(scoreListTemps []model.ScoreListTemp, taskInfo model.Reptil
 		}
 		//获取HTML
 		log.Println(s)
-		reader, err := net.GetRequestForReader(BaseUrl + href)
+		reader, err := util.GetRequestForReader(BaseUrl + href)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -176,7 +176,7 @@ func GetScoreIdFromHref(href string) int {
 
 //获取曲谱浏览量
 func getScoreViewCount(id int) int {
-	viewCountStr, _ := net.GetRequest(BaseUrl + "Opern-cnum-id-" + strconv.Itoa(id) + ".html")
+	viewCountStr, _ := util.GetRequest(BaseUrl + "Opern-cnum-id-" + strconv.Itoa(id) + ".html")
 	viewCount, _ := strconv.Atoi(viewCountStr)
 	return viewCount
 }

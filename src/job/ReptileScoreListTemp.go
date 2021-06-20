@@ -1,9 +1,9 @@
-package main
+package job
 
 import (
 	"ScoreReptile/src/db"
 	"ScoreReptile/src/model"
-	"ScoreReptile/src/net"
+	"ScoreReptile/src/util"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"strings"
@@ -168,7 +168,7 @@ func processChildTask(taskName string, parentTaskInfo model.ReptileTaskInfo, tem
 }
 
 func tempScoreReptileListType1(url, category string, scoreListTempList *[]*model.ScoreListTemp) {
-	reader, err := net.GetRequestForReader(url)
+	reader, err := util.GetRequestForReader(url)
 	if err != nil {
 		log.Println(err)
 		return
@@ -221,7 +221,7 @@ func tempScoreReptileListType1(url, category string, scoreListTempList *[]*model
 }
 
 func tempScoreReptileListType2(url, category string, scoreListTempList *[]*model.ScoreListTemp) {
-	reader, err := net.GetRequestForReader(url)
+	reader, err := util.GetRequestForReader(url)
 	if err != nil {
 		log.Println(err)
 		return
@@ -275,7 +275,7 @@ func tempScoreReptileListType2(url, category string, scoreListTempList *[]*model
 }
 
 func tempScoreReptileListType3(url, category string, scoreListTempList *[]*model.ScoreListTemp) {
-	reader, err := net.GetRequestForReader(url)
+	reader, err := util.GetRequestForReader(url)
 	if err != nil {
 		log.Println(err)
 		return

@@ -8,9 +8,13 @@ import (
 func StartHttpServer() {
 	r := gin.Default()
 	r.BasePath()
-	rg := r.Group("/admin/api")
+	taskGroup := r.Group("/admin/api")
 	{
-		rg.GET("/getTopTaskList", getTopTaskList)
+		taskGroup.GET("/getTopTaskList", getTopTaskList)
+	}
+	scoreGroup := r.Group("/admin/api")
+	{
+		scoreGroup.GET("/getTaskScoreList", getTaskScoreList)
 	}
 	err := r.Run("0.0.0.0:7002")
 	if err != nil {

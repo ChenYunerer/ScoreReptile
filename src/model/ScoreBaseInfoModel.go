@@ -21,4 +21,13 @@ type ScoreBaseInfo struct {
 	TaskId            string `xorm:"task_id" json:"taskId"`                        //所属任务ID
 }
 
+var Id = "id"
+var ScoreId = "score_id"
 var ScoreUploadTime = "score_upload_time"
+var ScoreName = "score_name"
+var ScoreSinger = "score_singer"
+var ScoreAuthor = "score_author"
+var ScoreWordWriter = "score_word_writer"
+var ScoreSongWriter = "score_song_writer"
+var ScoreFormat = "score_format"
+var ScoreUploader = "score_uploader"

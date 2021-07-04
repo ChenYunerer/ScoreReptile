@@ -10,11 +10,15 @@ func StartHttpServer() {
 	r.BasePath()
 	taskGroup := r.Group("/admin/api")
 	{
+		taskGroup.GET("/getTaskGeneralInfo", getTaskGeneralInfo)
 		taskGroup.GET("/getTopTaskList", getTopTaskList)
+		taskGroup.GET("/getTaskScoreList", getTaskScoreList)
 	}
 	scoreGroup := r.Group("/admin/api")
 	{
-		scoreGroup.GET("/getTaskScoreList", getTaskScoreList)
+		taskGroup.GET("/getScoreGeneralInfo", getScoreGeneralInfo)
+		scoreGroup.GET("/searchScore", searchScore)
+		scoreGroup.GET("/getScoreDetail", getScoreDetail)
 	}
 	err := r.Run("0.0.0.0:7002")
 	if err != nil {

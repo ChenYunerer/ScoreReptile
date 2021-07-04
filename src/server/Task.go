@@ -7,6 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func getTaskGeneralInfo(c *gin.Context) {
+	var taskInfoList model.ReptileTaskInfo
+	failNum, _ := db.Engine.Where(model.ParentTaskId+" = '' and "+model.TaskStatus+"= ?", -1).Count(taskInfoList)
+	successNum, _ := db.Engine.Where(model.ParentTaskId+" = '' and "+model.TaskStatus+"= ?", 2).Count(taskInfoList)
+	taskNum, _ := db.Engine.Where(model.ParentTaskId + " = ''").Count(taskInfoList)
+	taskGeneralInfo := http.TaskGeneralInfo{
+		taskNum,
+		successNum,
+		failNum,
+	}
+	c.JSON(200, http.GenSuccessResponseWithData(taskGeneralInfo))
+}
+
 func getTopTaskList(c *gin.Context) {
 	var taskInfoList []model.ReptileTaskInfo
 	db.Engine.Desc(model.CreateTime).Find(&taskInfoList)

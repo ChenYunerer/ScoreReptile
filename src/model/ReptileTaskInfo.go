@@ -38,4 +38,5 @@ func CreateBasicTaskInfo(name string) *ReptileTaskInfo {
 }
 
 const ParentTaskId = "parent_task_id"
+const TaskStatus = "task_status"
 const CreateTime = "create_time"

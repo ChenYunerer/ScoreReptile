@@ -19,7 +19,7 @@ var picGetThreadNum = runtime.NumCPU() * 2
 
 func startProcessPictureInfo(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
 	//生成任务
-	taskInfo := model.CreateBasicTaskInfo("抓取曲谱图片任务")
+	taskInfo := model.CreateBasicTaskInfo("抓取曲谱图片任务", parentTaskInfo.Task_type)
 	taskInfo.Top_task_id = parentTaskInfo.Top_task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
 	_, err := db.Engine.InsertOne(taskInfo)
@@ -45,7 +45,7 @@ func startProcessPictureInfo(parentTaskInfo model.ReptileTaskInfo) model.Reptile
 		wg.Add(1)
 		go func(items []model.ScoreBaseInfo) {
 			defer wg.Done()
-			_scorePictureInfoList := pictureInfoReptile(items)
+			_scorePictureInfoList := pictureInfoReptile(items, *taskInfo)
 			scorePictureInfoList = append(scorePictureInfoList, _scorePictureInfoList...)
 		}(scoreBaseInfos)
 	}
@@ -72,7 +72,7 @@ func startProcessPictureInfo(parentTaskInfo model.ReptileTaskInfo) model.Reptile
 	return *taskInfo
 }
 
-func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) []model.ScorePictureInfo {
+func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo, taskInfo model.ReptileTaskInfo) []model.ScorePictureInfo {
 	scorePictureInfoList := make([]model.ScorePictureInfo, 0)
 	for index, s := range scoreBaseInfos {
 		url := BaseUrl + "Mobile-view-id-" + strconv.Itoa(s.ScoreId) + ".html"
@@ -110,6 +110,7 @@ func pictureInfoReptile(scoreBaseInfos []model.ScoreBaseInfo) []model.ScorePictu
 				ScoreHref:         s.ScoreHref,
 				ScorePictureIndex: i,
 				ScorePictureHref:  pictureHref,
+				TopTaskId:         taskInfo.Top_task_id,
 			}
 			scorePictureInfoList = append(scorePictureInfoList, scorePictureInfo)
 		})

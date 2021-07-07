@@ -20,6 +20,10 @@ func StartHttpServer() {
 		scoreGroup.GET("/searchScore", searchScore)
 		scoreGroup.GET("/getScoreDetail", getScoreDetail)
 	}
+	debugGroup := r.Group("/admin/api/debug")
+	{
+		debugGroup.GET("/test", test)
+	}
 	err := r.Run("0.0.0.0:7002")
 	if err != nil {
 		log.Panic("http server start err: ", err)

@@ -18,7 +18,7 @@ import (
 
 func startProcessBaseInfo(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
 	//生成一个任务
-	taskInfo := model.CreateBasicTaskInfo("曲谱基本数据抓取任务")
+	taskInfo := model.CreateBasicTaskInfo("曲谱基本数据抓取任务", parentTaskInfo.Task_type)
 	taskInfo.Top_task_id = parentTaskInfo.Task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
 	db.Engine.InsertOne(taskInfo)

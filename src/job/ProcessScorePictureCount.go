@@ -11,7 +11,7 @@ import (
 var picCountThreadNum = runtime.NumCPU() * 2
 
 func startProcessScorePictureCount(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
-	taskInfo := model.CreateBasicTaskInfo("计算曲谱图片任务")
+	taskInfo := model.CreateBasicTaskInfo("计算曲谱图片任务", parentTaskInfo.Task_type)
 	taskInfo.Top_task_id = parentTaskInfo.Top_task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
 	_, err := db.Engine.InsertOne(taskInfo)

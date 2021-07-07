@@ -90,7 +90,7 @@ func init() {
 //minge（民歌）meisheng（美声）tongsu（通俗）waiguo（外国）shaoer（少儿）hechang（合唱） 使用tempScoreReptileListType3
 func startProcessListTemp(parentTaskInfo model.ReptileTaskInfo) model.ReptileTaskInfo {
 	// 创建并插入任务
-	taskInfo := model.CreateBasicTaskInfo("各分类列表任务")
+	taskInfo := model.CreateBasicTaskInfo("各分类列表任务", parentTaskInfo.Task_type)
 	taskInfo.Top_task_id = parentTaskInfo.Task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
 	db.Engine.InsertOne(taskInfo)
@@ -148,7 +148,7 @@ func startProcessListTemp(parentTaskInfo model.ReptileTaskInfo) model.ReptileTas
 }
 
 func processChildTask(taskName string, parentTaskInfo model.ReptileTaskInfo, tempScoreReptileFunc func(scoreListTempList *[]*model.ScoreListTemp)) model.ReptileTaskWrapper {
-	taskInfo := model.CreateBasicTaskInfo(taskName)
+	taskInfo := model.CreateBasicTaskInfo(taskName, parentTaskInfo.Task_type)
 	taskInfo.Top_task_id = parentTaskInfo.Top_task_id
 	taskInfo.Parent_task_id = parentTaskInfo.Task_id
 	scoreListTempList := make([]*model.ScoreListTemp, 0)

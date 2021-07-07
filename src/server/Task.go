@@ -21,8 +21,13 @@ func getTaskGeneralInfo(c *gin.Context) {
 }
 
 func getTopTaskList(c *gin.Context) {
+	taskType := c.Query("taskType")
 	var taskInfoList []model.ReptileTaskInfo
-	db.Engine.Desc(model.CreateTime).Find(&taskInfoList)
+	session := db.Engine.Desc(model.CreateTime)
+	if taskType != "" {
+		session.Where(model.TaskType+"=?", taskType)
+	}
+	session.Find(&taskInfoList)
 	// 任务分组
 	var topTaskList []*http.ReptileTaskWithChild
 	for _, item := range taskInfoList {

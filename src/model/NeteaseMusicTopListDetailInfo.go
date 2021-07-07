@@ -15,3 +15,5 @@ type NeteaseMusicTopListDetailInfo struct {
 	TopTaskId         string    `xorm:"top_task_id" json:"topTaskId"`                  //所属顶层父任务ID
 	TaskId            string    `xorm:"task_id" json:"taskId"`                         //所属任务ID
 }
+
+var Sort = "sort"

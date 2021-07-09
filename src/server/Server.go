@@ -14,6 +14,7 @@ func StartHttpServer() {
 		taskGroup.GET("/getTopTaskList", getTopTaskList)
 		taskGroup.GET("/getTaskScoreList", getTaskScoreList)
 		taskGroup.GET("/getTaskTopListDetailList", getTaskTopListDetailList)
+		taskGroup.GET("/getTopListAllDate", getTopListAllDate)
 	}
 	scoreGroup := r.Group("/admin/api")
 	{

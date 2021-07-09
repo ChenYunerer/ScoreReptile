@@ -9,11 +9,25 @@ import (
 
 func getTaskTopListDetailList(c *gin.Context) {
 	topTaskId := c.Query("topTaskId")
-	if topTaskId == "" {
-		c.JSON(200, http.GenErrorResponse("topTaskId is empty"))
-		return
-	}
+	topListUpdateTime := c.Query("topListUpdateTime")
 	var topListDetailList []model.NeteaseMusicTopListDetailInfo
-	db.Engine.Where(model.TopTaskId+"= ?", topTaskId).Asc(model.Sort).Find(&topListDetailList)
+	session := db.Engine.Asc(model.Sort)
+	if topTaskId != "" {
+		session.Where(model.TopTaskId+"= ?", topTaskId)
+	}
+	if topListUpdateTime != "" {
+		session.Where(model.TopListUpdateTime+"= ?", topListUpdateTime)
+	}
+	session.Find(&topListDetailList)
 	c.JSON(200, http.GenSuccessResponseWithData(topListDetailList))
+}
+
+func getTopListAllDate(c *gin.Context) {
+	var topListDetailList []model.NeteaseMusicTopListDetailInfo
+	db.Engine.Select(model.TopListUpdateTime).GroupBy(model.TopListUpdateTime).Find(&topListDetailList)
+	timeList := make([]string, 0)
+	for _, item := range topListDetailList {
+		timeList = append(timeList, item.TopListUpdateTime.String())
+	}
+	c.JSON(200, http.GenSuccessResponseWithData(timeList))
 }

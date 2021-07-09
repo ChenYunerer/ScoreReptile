@@ -17,3 +17,5 @@ type NeteaseMusicTopListDetailInfo struct {
 }
 
 var Sort = "sort"
+var TopListId = "top_list_id"
+var TopListUpdateTime = "top_list_update_time"

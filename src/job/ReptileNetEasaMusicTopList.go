@@ -81,6 +81,7 @@ func startReptileNetEaseMusicTopList(parentTaskInfo model.ReptileTaskInfo) model
 
 func doReptileNetEaseMusicTopList(baseUrl string, topListId int, topListName string, parentTaskInfo model.ReptileTaskInfo) []model.NeteaseMusicTopListDetailInfo {
 	nowTime := time.Now()
+	topListInfoList := make([]model.NeteaseMusicTopListDetailInfo, 0)
 	url := baseUrl + "?id=" + strconv.Itoa(topListId)
 	reader, err := util.GetRequestForReader(url)
 	if err != nil {
@@ -98,8 +99,12 @@ func doReptileNetEaseMusicTopList(baseUrl string, topListId int, topListName str
 	month, _ := strconv.Atoi(splits[0])
 	day, _ := strconv.Atoi(splits[1])
 	topListUpdateTime := time.Date(nowTime.Year(), time.Month(month), day, 0, 0, 0, 0, nowTime.Location())
+	// 判断日期是否存在
+	count, _ := db.Engine.Where(model.TopListId+" = ? and "+model.TopListUpdateTime+" = ?", topListId, topListUpdateTime.String()).Count(&model.NeteaseMusicTopListDetailInfo{})
+	if count > 0 {
+		return topListInfoList
+	}
 	// 获取榜单数据
-	topListInfoList := make([]model.NeteaseMusicTopListDetailInfo, 0)
 	document.Find("#song-list-pre-cache li").Each(func(i int, selection *goquery.Selection) {
 		hrefStr, _ := selection.Find("a").Attr("href")
 		songName := selection.Find("a").Text()

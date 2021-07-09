@@ -17,7 +17,7 @@ func StartCronJob() {
 	if err != nil {
 		log.Panic("add cron func err: ", err)
 	}
-	_, err = c.AddFunc("0 0 2 * * ?", func() {
+	_, err = c.AddFunc("0 0 22 * * ?", func() {
 		StartNetEaseMusicReptileTask()
 	})
 	if err != nil {
